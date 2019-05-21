@@ -1,7 +1,13 @@
 package com.e.newapplication;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -28,7 +35,7 @@ public class AddHeroActivity extends AppCompatActivity {
     private EditText etName,etDesc;
     private ImageView imgHero;
     private Button btnSave;
-
+    String imgPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +47,8 @@ public class AddHeroActivity extends AppCompatActivity {
         imgHero = findViewById(R.id.imgHero);
         btnSave = findViewById(R.id.btnSave);
 
-        loadFromUrl();
+
+//        loadFromUrl();
         
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,31 +56,78 @@ public class AddHeroActivity extends AppCompatActivity {
                 AddHero();
             }
         });
+
+        imgHero.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Browse();
+            }
+        });
     }
 
-    private void StrictMode()
-    {
-        android.os.StrictMode.ThreadPolicy policy= new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
-        android.os.StrictMode.setThreadPolicy(policy);
+    private void Browse() {
+        Intent browseIntent = new Intent(Intent.ACTION_PICK);
+        browseIntent.setType("image/*");
+        startActivityForResult(browseIntent, 0);
 
     }
 
-    private void loadFromUrl() {
-        StrictMode();
-        try
-        {
-            String imgUrl="https://pmcvariety.files.wordpress.com/2019/03/spider-man-shattered-dimensions.png?w=805";
-            URL url = new URL(imgUrl);
-            imgHero.setImageBitmap(BitmapFactory.decodeStream((InputStream)url.getContent()));
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            Toast.makeText(AddHeroActivity.this, "Error",Toast.LENGTH_SHORT).show();
+        if (resultCode ==RESULT_OK){
+            if (data == null) {
+                Toast.makeText(this,"Please Select an Image",Toast.LENGTH_SHORT).show();
+            }
         }
-
-
+        Uri uri = data.getData();
+        imgPath = getRealDataFromUri(uri);
+        previewImage(imgPath);
     }
+
+    private void previewImage(String imgPath) {
+        File imgFile = new File(imgPath);
+        if (imgFile.exists()){
+            Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            imgHero.setImageBitmap(bitmap);
+        }
+    }
+
+    private String getRealDataFromUri(Uri uri) {
+        String []projection ={MediaStore.Images.Media.DATA};
+        CursorLoader loader= new CursorLoader(getApplicationContext(),uri,projection,null,null,null);
+        Cursor cursor = loader.loadInBackground();
+        int colIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(colIndex);
+        cursor.close();
+        return result;
+    }
+
+    //    private void StrictMode()
+//    {
+//        android.os.StrictMode.ThreadPolicy policy= new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
+//        android.os.StrictMode.setThreadPolicy(policy);
+//
+//    }
+
+//    private void loadFromUrl() {
+//        StrictMode();
+//        try
+//        {
+//            String imgUrl="https://pmcvariety.files.wordpress.com/2019/03/spider-man-shattered-dimensions.png?w=805";
+//            URL url = new URL(imgUrl);
+//            imgHero.setImageBitmap(BitmapFactory.decodeStream((InputStream)url.getContent()));
+//
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            Toast.makeText(AddHeroActivity.this, "Error",Toast.LENGTH_SHORT).show();
+//        }
+//
+//
+//    }
 
     private void AddHero() {
 
