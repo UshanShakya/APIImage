@@ -11,7 +11,9 @@
     <ImageView
         android:id="@+id/imgHero"
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="300dp"
+        android:src="@drawable/ic_launcher_foreground"
+        />
 
     <EditText
         android:id="@+id/etName"
