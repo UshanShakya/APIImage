@@ -40,7 +40,7 @@ private RecyclerView recyclerView;
         listCall.enqueue(new Callback<List<Heroes>>() {
             @Override
             public void onResponse(Call<List<Heroes>> call, Response<List<Heroes>> response) {
-                if (!response.isSuccessful()){
+                if (!response.isSuccessful()){asda
                     Toast.makeText(getApplicationContext(),"error " +response.code(),Toast.LENGTH_SHORT).show();
                     return;
                 }
